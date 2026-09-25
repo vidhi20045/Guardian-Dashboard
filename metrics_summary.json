@@ -1,0 +1,41 @@
+{
+  "prediction": {
+    "auc": 0.796,
+    "auc_ci": [0.789, 0.802],
+    "pr_auc": 0.373,
+    "pr_auc_ci": [0.360, 0.386],
+    "brier": 0.086
+  },
+  "spatial": {
+    "mean": 0.820,
+    "range": [0.705, 0.959],
+    "n_states": 49
+  },
+  "extreme": {
+    "worst_1pct": 0.824,
+    "worst_5pct": 0.818
+  },
+  "fairness": {
+    "gain_points": 42.5,
+    "vuln_greedy": 27.5,
+    "vuln_guardian": 70.0,
+    "abandoned_greedy": 1121
+  },
+  "dynamic": {"from": 21.3, "to": 27.6, "relative_pct": 30},
+  "uncertainty": {"from": 24.9, "to": 34.0, "relative_pct": 37},
+  "conformal": {"target": 95, "empirical": 94.5, "unsure_pct": 15.9},
+  "delong": {"vs_historical_z": 35.6, "vs_nri_z": 51.4, "p": "<1e-12"},
+  "bias_robust": {"unbiased": 70.0, "biased_standard": 56.0, "biased_robust": 75.5},
+  "shap_top": [
+    ["County disaster history", 1.00],
+    ["Property damage", 0.70],
+    ["Flood events", 0.50],
+    ["Month (seasonality)", 0.35]
+  ],
+  "models": [
+    ["XGBoost (chosen)", 0.796, 0.373],
+    ["Random Forest", 0.800, 0.350],
+    ["Logistic Regression", 0.772, 0.274],
+    ["MLP (neural net)", 0.751, 0.295]
+  ]
+}

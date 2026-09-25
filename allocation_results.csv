@@ -1,0 +1,11 @@
+supply,method,total,vulnerable,gini,abandoned
+20,Greedy,20.0,11.0,0.994,1143
+20,Max-min,20.0,20.0,0.000,0
+20,Guardian,20.0,70.0,0.436,0
+40,Greedy,40.0,27.5,0.975,1121
+40,Proportional,40.0,52.7,0.090,0
+40,Max-min,40.0,40.0,0.000,0
+40,Guardian,40.0,70.0,0.152,0
+60,Greedy,60.0,45.7,0.929,1067
+60,Max-min,60.0,60.0,0.000,0
+60,Guardian,60.0,70.0,0.036,0

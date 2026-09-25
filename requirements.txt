@@ -1,0 +1,8 @@
+streamlit>=1.40
+pandas>=1.5
+plotly>=5.18
+folium>=0.15
+streamlit-folium>=0.18
+xgboost>=2.0
+shap>=0.43
+numpy>=1.24
