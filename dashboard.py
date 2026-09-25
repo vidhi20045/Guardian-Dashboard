@@ -11,6 +11,7 @@
 # from pathlib import Path
 
 # import pandas as pd
+# import plotly.express as px
 # import plotly.graph_objects as go
 # import streamlit as st
 
@@ -19,7 +20,7 @@
 # DATA = Path(__file__).parent / "data"
 
 # st.set_page_config(page_title="Disaster Prediction & Fair Allocation",
-#                    page_icon="🌪️", layout="wide")
+#                    layout="wide")
 
 # # ------------------------------------------------- embedded real results (no files needed)
 # _METRICS = {
@@ -98,17 +99,17 @@
 
 # counties, alloc, climate, frontier, M = load()
 
-# st.title("🌪️ Disaster Prediction & Fairness-Aware Resource Allocation")
+# st.title("Disaster Prediction & Fairness-Aware Resource Allocation")
 # st.caption("Predicting US county federal-disaster declarations and allocating relief equitably. "
 #            "Interactive supplement to the IJDRR submission.")
 
-# tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs([
-#     "ℹ️ Overview", "📊 County Prediction", "🎯 Fair Allocation", "🌡️ Climate Stress",
-#     "📈 Results Summary", "📥 Export & Share"])
+# tab0, tab1, tabmap, tab2, tab3, tab4, tab5 = st.tabs([
+#     "Overview", "County Prediction", "Risk Map", "Fair Allocation",
+#     "Climate Stress", "Results Summary", "Export & Share"])
 
 # # ============================================================ TAB 0: Overview
 # with tab0:
-#     st.subheader("ℹ️ What this project does")
+#     st.subheader("What this project does")
 
 #     st.markdown(
 #         "> **The problem.** When disasters strike, federal relief is limited — and the communities "
@@ -125,14 +126,14 @@
 #         "validated tool for deciding **where to pre-position relief before disasters strike**, more "
 #         "equitably.")
 
-#     st.markdown("#### 📌 Key results at a glance")
+#     st.markdown("#### Key results at a glance")
 #     k = st.columns(4)
 #     k[0].metric("Prediction accuracy", "0.796 AUC", "beats baselines p<1e-12", delta_color="off")
 #     k[1].metric("Vulnerable coverage", "27.5% → 70%", "+42.5 points", delta_color="off")
 #     k[2].metric("Counties greedy abandons", "1,121/mo", "Guardian: 0", delta_color="off")
 #     k[3].metric("Under climate + budget cut", "70% held", "equity guaranteed", delta_color="off")
 
-#     st.markdown("#### 🔄 How it works (pipeline)")
+#     st.markdown("#### How it works (pipeline)")
 #     st.graphviz_chart("""
 #     digraph G {
 #       rankdir=LR; bgcolor="transparent";
@@ -147,18 +148,18 @@
 #       d -> f -> x -> u -> g -> o;
 #     }
 #     """)
-#     st.caption("Stage 1 (blue → green): prediction.  Stage 2 (green → red): fair allocation.")
+#     st.caption("Stage 1 (blue to green): prediction.  Stage 2 (green to red): fair allocation.")
 
-#     st.markdown("#### 🧭 What each dashboard tab shows")
+#     st.markdown("#### What each dashboard tab shows")
 #     st.markdown(
-#         "- **📊 County Prediction** — for any county: disaster risk, confidence interval, the "
+#         "- **County Prediction** — for any county: disaster risk, confidence interval, the "
 #         "**SHAP drivers** behind it, and a plain high/low-risk verdict.\n"
-#         "- **🎯 Fair Allocation** — Guardian vs. greedy/proportional/max-min, and the "
+#         "- **Fair Allocation** — Guardian vs. greedy/proportional/max-min, and the "
 #         "fairness–efficiency trade-off.\n"
-#         "- **🌡️ Climate Stress** — whether the equity guarantee survives IPCC warming scenarios.\n"
-#         "- **📈 Results Summary** — every headline number from the paper in one place.")
+#         "- **Climate Stress** — whether the equity guarantee survives IPCC warming scenarios.\n"
+#         "- **Results Summary** — every headline number from the paper in one place.")
 
-#     st.markdown("#### 🏆 Contributions")
+#     st.markdown("#### Contributions")
 #     st.markdown(
 #         "1. **Accurate, validated prediction** of county disaster escalation from real data "
 #         "(AUC 0.796; 0.82 across unseen states; sharper on the worst months), significantly beating "
@@ -181,13 +182,13 @@
 
 # # ============================================================ TAB 1: County prediction
 # with tab1:
-#     st.subheader("📊 County Disaster Risk Prediction")
+#     st.subheader("County Disaster Risk Prediction")
 #     if (DATA / "county_predictions.csv").exists():
 #         st.caption("Showing real model output (per-county risk, CIs, and SHAP from your trained model).")
 #     else:
 #         st.info("County-level values here are illustrative placeholders. Run "
 #                 "`make_dashboard_data.py` and copy `county_predictions.csv` into `data/` to show "
-#                 "real predictions.", icon="ℹ️")
+#                 "real predictions.")
 #     names = counties["county_name"] + ", " + counties["state"]
 #     pick = st.selectbox("Select a county", names.tolist(), index=0)
 #     row = counties.iloc[names.tolist().index(pick)]
@@ -197,23 +198,21 @@
 #         risk = float(row["risk"])
 #         st.markdown(f"<h1 style='color:{NAVY};margin-bottom:0'>{risk*100:.1f}%</h1>",
 #                     unsafe_allow_html=True)
-#         st.markdown(f"chance of a federal disaster declaration  "
-#                     f"&nbsp;{'⚠️' if risk>0.25 else '✅'}", unsafe_allow_html=True)
+#         st.markdown("chance of a federal disaster declaration")
 #         st.caption(f"95% CI: [{row['ci_low']*100:.1f}%, {row['ci_high']*100:.1f}%]")
 
 #         # plain-language verdict: is this county high or low risk?
 #         if risk >= 0.40:
-#             st.error("🔴 **Very high risk** — strong candidate for relief pre-positioning.")
+#             st.error("**Very high risk** — strong candidate for relief pre-positioning.")
 #         elif risk >= 0.25:
-#             st.warning("🟠 **Elevated risk** — monitor and consider pre-positioning.")
+#             st.warning("**Elevated risk** — monitor and consider pre-positioning.")
 #         elif risk >= 0.15:
-#             st.info("🟡 **Moderate risk** — keep on watch.")
+#             st.info("**Moderate risk** — keep on watch.")
 #         else:
-#             st.success("🟢 **Low risk** — unlikely to need federal relief this month.")
+#             st.success("**Low risk** — unlikely to need federal relief this month.")
 
 #         conf = row["confidence"]
-#         cdot = {"High": "🟢", "Medium": "🔵", "Low": "🟠"}.get(conf, "🔵")
-#         st.markdown(f"**Model confidence:** {conf} {cdot}  "
+#         st.markdown(f"**Model confidence:** {conf}  "
 #                     f"<span style='color:{GRAY}'>(conformal; ~15.9% of county-months flagged "
 #                     f"'uncertain' at 95%)</span>", unsafe_allow_html=True)
 #     with right:
@@ -231,10 +230,8 @@
 #             st.map(pd.DataFrame({"lat": [row["lat"]], "lon": [row["lon"]]}))
 
 #     # SHAP: why this prediction? — as a clear horizontal bar chart
-#     st.markdown("#### 🔍 Why this prediction? — SHAP feature contributions")
-#     icons = {"County disaster history": "🏠", "Property damage": "💰", "Flood events": "🌊",
-#              "Storm count": "🌀", "Month (seasonality)": "📅", "Tropical events": "🌀"}
-#     sf = [f"{icons.get(row[f'shap{i}'],'•')} {row[f'shap{i}']}" for i in (1, 2, 3)]
+#     st.markdown("#### Why this prediction? — SHAP feature contributions")
+#     sf = [f"{row[f'shap{i}']}" for i in (1, 2, 3)]
 #     sv = [float(row[f"shap{i}_val"]) * 100 for i in (1, 2, 3)]
 #     figs = go.Figure(go.Bar(x=sv[::-1], y=sf[::-1], orientation="h", marker_color=NAVY,
 #                             text=[f"+{v:.0f}%" for v in sv[::-1]], textposition="outside"))
@@ -246,12 +243,66 @@
 
 #     exp = row[["county_name", "state", "risk", "ci_low", "ci_high",
 #                "shap1", "shap2", "shap3"]].to_frame().T
-#     st.download_button("⬇️ Export this prediction (CSV)", exp.to_csv(index=False),
+#     st.download_button("Export this prediction (CSV)", exp.to_csv(index=False),
 #                        f"prediction_{row['county_fips']}.csv", "text/csv")
+
+# # ============================================================ MAP TAB: Risk spread
+# @st.cache_data
+# def _county_geojson():
+#     import json
+#     import urllib.request
+#     url = ("https://raw.githubusercontent.com/plotly/datasets/master/"
+#            "geojson-counties-fips.json")
+#     with urllib.request.urlopen(url, timeout=25) as r:
+#         return json.load(r)
+
+
+# with tabmap:
+#     st.subheader("Where disaster risk concentrates (US counties)")
+#     st.markdown("Each county is shaded by its **predicted probability of a federal disaster "
+#                 "declaration**. Red = higher risk, green = lower. This shows the *spread* of risk "
+#                 "across the country.")
+#     cdf = counties.copy()
+#     cdf["fips"] = cdf["county_fips"].str.zfill(5)
+#     cdf["risk_pct"] = (cdf["risk"] * 100).round(1)
+#     if len(cdf) < 200:
+#         st.info("Showing only the bundled sample counties. Run `make_dashboard_data.py` and copy "
+#                 "`county_predictions.csv` into `data/` to map all ~3,200 counties.")
+
+#     rendered = False
+#     try:
+#         gj = _county_geojson()
+#         fig = px.choropleth(cdf, geojson=gj, locations="fips", color="risk_pct",
+#                             color_continuous_scale="RdYlGn_r", scope="usa",
+#                             hover_name="county_name",
+#                             hover_data={"state": True, "risk_pct": True, "fips": False},
+#                             labels={"risk_pct": "risk %"})
+#         fig.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=540,
+#                           coloraxis_colorbar_title="risk %")
+#         st.plotly_chart(fig, width='stretch')
+#         rendered = True
+#     except Exception:
+#         pass
+
+#     if not rendered:  # offline fallback: dot map using county centroids (no boundaries needed)
+#         fig = px.scatter_geo(cdf, lat="lat", lon="lon", color="risk_pct", scope="usa",
+#                              color_continuous_scale="RdYlGn_r", hover_name="county_name",
+#                              hover_data={"state": True, "risk_pct": True},
+#                              labels={"risk_pct": "risk %"})
+#         fig.update_traces(marker=dict(size=7, line=dict(width=0)))
+#         fig.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=540,
+#                           coloraxis_colorbar_title="risk %")
+#         st.caption("County-boundary file unavailable offline — showing counties as points instead.")
+#         st.plotly_chart(fig, width='stretch')
+
+#     hi = cdf.nlargest(10, "risk")[["county_name", "state", "risk_pct"]]
+#     st.markdown("**Highest-risk counties shown:**")
+#     st.dataframe(hi.rename(columns={"county_name": "County", "state": "State",
+#                                     "risk_pct": "Risk %"}), hide_index=True, width='stretch')
 
 # # ============================================================ TAB 2: Fair allocation
 # with tab2:
-#     st.subheader("🎯 Fair Resource Allocation")
+#     st.subheader("Fair Resource Allocation")
 #     supply = st.slider("Relief supply (% of total predicted need)", 20, 60, 40, step=20)
 #     sub = alloc[alloc["supply"] == supply].copy()
 
@@ -299,12 +350,12 @@
 #     ff.update_layout(xaxis_title="Equity floor", yaxis_title="Score (%)",
 #                      height=360, margin=dict(t=20))
 #     st.plotly_chart(ff, width='stretch')
-#     st.download_button("⬇️ Export allocation comparison (CSV)", sub.to_csv(index=False),
+#     st.download_button("Export allocation comparison (CSV)", sub.to_csv(index=False),
 #                        f"allocation_supply{supply}.csv", "text/csv")
 
 # # ============================================================ TAB 3: Climate stress
 # with tab3:
-#     st.subheader("🌡️ Climate Stress Testing")
+#     st.subheader("Climate Stress Testing")
 #     c1, c2 = st.columns(2)
 #     scenario = c1.radio("Emissions scenario",
 #                         ["Current", "SSP2-4.5", "SSP5-8.5"], horizontal=True)
@@ -318,7 +369,7 @@
 #     a, b = st.columns(2)
 #     a.metric("Total coverage", f"{rec['total']:.1f}%",
 #              delta=f"{rec['total']-40:.1f} vs current", delta_color="inverse")
-#     b.metric("Vulnerable coverage", f"{rec['vulnerable']:.1f}%", delta="held ✅",
+#     b.metric("Vulnerable coverage", f"{rec['vulnerable']:.1f}%", delta="held",
 #              delta_color="off")
 
 #     fig = go.Figure()
@@ -334,15 +385,15 @@
 #     if rec["greedy_vulnerable"] < 30:
 #         st.warning(f"Under {scenario}{' + budget cut' if cut else ''}, the greedy baseline leaves "
 #                    f"vulnerable coverage at ~{rec['greedy_vulnerable']:.0f}% and abandons ~1,121+ "
-#                    f"counties/month, while Guardian holds {rec['vulnerable']:.0f}%.", icon="⚠️")
+#                    f"counties/month, while Guardian holds {rec['vulnerable']:.0f}%.")
 #     st.caption("Hazard factors derived from IPCC AR6 warming × ~7%/°C precipitation scaling "
 #                "(SSP2-4.5: +19%; SSP5-8.5: +31%).")
-#     st.download_button("⬇️ Export climate results (CSV)", climate.to_csv(index=False),
+#     st.download_button("Export climate results (CSV)", climate.to_csv(index=False),
 #                        "climate_stress.csv", "text/csv")
 
 # # ============================================================ TAB 4: Results summary
 # with tab4:
-#     st.subheader("📈 Results Summary (paper metrics)")
+#     st.subheader("Results Summary (paper metrics)")
 #     p, s, e = M["prediction"], M["spatial"], M["extreme"]
 #     r1 = st.columns(4)
 #     r1[0].metric("ROC-AUC", f"{p['auc']:.3f}", f"CI [{p['auc_ci'][0]}, {p['auc_ci'][1]}]",
@@ -382,12 +433,12 @@
 #         st.dataframe(md.style.format({"AUC": "{:.3f}", "PR-AUC": "{:.3f}"})
 #                      .highlight_max(subset=["AUC"], color="#e6f4ea"),
 #                      hide_index=True, width='stretch')
-#     st.download_button("⬇️ Export all metrics (JSON)", json.dumps(M, indent=2),
+#     st.download_button("Export all metrics (JSON)", json.dumps(M, indent=2),
 #                        "metrics_summary.json", "application/json")
 
 # # ============================================================ TAB 5: Export & share
 # with tab5:
-#     st.subheader("📥 Export & Share")
+#     st.subheader("Export & Share")
 #     st.markdown("**Download results**")
 #     d = st.columns(4)
 #     d[0].download_button("County predictions (CSV)", counties.to_csv(index=False),
@@ -401,14 +452,7 @@
 #     st.caption("For 300-DPI figures, use each Plotly chart's camera icon (top-right on hover) "
 #                "to export a publication-quality PNG.")
 
-#     st.divider()
-#     st.markdown("**Citation**")
-#     st.code("Author(s). \"ML-Based Prediction and Fairness-Aware Allocation of US Federal "
-#             "Disaster Resources.\" International Journal of Disaster Risk Reduction (under review). "
-#             "DOI: 10.xxxx/xxxxx", language="text")
-#     st.markdown("- 📄 Full paper: *IJDRR submission (link TBD)*\n"
-#                 "- 💻 Code: *github.com/your-repo/disaster-prediction*")
-#     st.caption("Open-access supplement · static pre-computed results · no login required.")
+
 
 """
 Disaster Prediction & Fairness-Aware Resource Allocation — Interactive Dashboard
@@ -422,6 +466,7 @@ import io
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -432,7 +477,7 @@ NAVY, GREEN, RED, GRAY = "#003366", "#2E8B57", "#DC143C", "#666666"
 DATA = Path(__file__).parent / "data"
 
 st.set_page_config(page_title="Disaster Prediction & Fair Allocation",
-                   page_icon="🌪️", layout="wide")
+                   layout="wide")
 
 # ------------------------------------------------- embedded real results (no files needed)
 _METRICS = {
@@ -511,17 +556,17 @@ def load():
 
 counties, alloc, climate, frontier, M = load()
 
-st.title("🌪️ Disaster Prediction & Fairness-Aware Resource Allocation")
+st.title("Disaster Prediction & Fairness-Aware Resource Allocation")
 st.caption("Predicting US county federal-disaster declarations and allocating relief equitably. "
            "Interactive supplement to the IJDRR submission.")
 
 tab0, tab1, tabmap, tab2, tab3, tab4, tab5 = st.tabs([
-    "ℹ️ Overview", "📊 County Prediction", "🗺️ Risk Map", "🎯 Fair Allocation",
-    "🌡️ Climate Stress", "📈 Results Summary", "📥 Export & Share"])
+    "Overview", "County Prediction", "Risk Map", "Fair Allocation",
+    "Climate Stress", "Results Summary", "Export & Share"])
 
 # ============================================================ TAB 0: Overview
 with tab0:
-    st.subheader("ℹ️ What this project does")
+    st.subheader("What this project does")
 
     st.markdown(
         "> **The problem.** When disasters strike, federal relief is limited — and the communities "
@@ -538,14 +583,14 @@ with tab0:
         "validated tool for deciding **where to pre-position relief before disasters strike**, more "
         "equitably.")
 
-    st.markdown("#### 📌 Key results at a glance")
+    st.markdown("#### Key results at a glance")
     k = st.columns(4)
     k[0].metric("Prediction accuracy", "0.796 AUC", "beats baselines p<1e-12", delta_color="off")
     k[1].metric("Vulnerable coverage", "27.5% → 70%", "+42.5 points", delta_color="off")
     k[2].metric("Counties greedy abandons", "1,121/mo", "Guardian: 0", delta_color="off")
     k[3].metric("Under climate + budget cut", "70% held", "equity guaranteed", delta_color="off")
 
-    st.markdown("#### 🔄 How it works (pipeline)")
+    st.markdown("#### How it works (pipeline)")
     st.graphviz_chart("""
     digraph G {
       rankdir=LR; bgcolor="transparent";
@@ -560,18 +605,18 @@ with tab0:
       d -> f -> x -> u -> g -> o;
     }
     """)
-    st.caption("Stage 1 (blue → green): prediction.  Stage 2 (green → red): fair allocation.")
+    st.caption("Stage 1 (blue to green): prediction.  Stage 2 (green to red): fair allocation.")
 
-    st.markdown("#### 🧭 What each dashboard tab shows")
+    st.markdown("#### What each dashboard tab shows")
     st.markdown(
-        "- **📊 County Prediction** — for any county: disaster risk, confidence interval, the "
+        "- **County Prediction** — for any county: disaster risk, confidence interval, the "
         "**SHAP drivers** behind it, and a plain high/low-risk verdict.\n"
-        "- **🎯 Fair Allocation** — Guardian vs. greedy/proportional/max-min, and the "
+        "- **Fair Allocation** — Guardian vs. greedy/proportional/max-min, and the "
         "fairness–efficiency trade-off.\n"
-        "- **🌡️ Climate Stress** — whether the equity guarantee survives IPCC warming scenarios.\n"
-        "- **📈 Results Summary** — every headline number from the paper in one place.")
+        "- **Climate Stress** — whether the equity guarantee survives IPCC warming scenarios.\n"
+        "- **Results Summary** — every headline number from the paper in one place.")
 
-    st.markdown("#### 🏆 Contributions")
+    st.markdown("#### Contributions")
     st.markdown(
         "1. **Accurate, validated prediction** of county disaster escalation from real data "
         "(AUC 0.796; 0.82 across unseen states; sharper on the worst months), significantly beating "
@@ -594,13 +639,13 @@ with tab0:
 
 # ============================================================ TAB 1: County prediction
 with tab1:
-    st.subheader("📊 County Disaster Risk Prediction")
+    st.subheader("County Disaster Risk Prediction")
     if (DATA / "county_predictions.csv").exists():
         st.caption("Showing real model output (per-county risk, CIs, and SHAP from your trained model).")
     else:
         st.info("County-level values here are illustrative placeholders. Run "
                 "`make_dashboard_data.py` and copy `county_predictions.csv` into `data/` to show "
-                "real predictions.", icon="ℹ️")
+                "real predictions.")
     names = counties["county_name"] + ", " + counties["state"]
     pick = st.selectbox("Select a county", names.tolist(), index=0)
     row = counties.iloc[names.tolist().index(pick)]
@@ -610,23 +655,21 @@ with tab1:
         risk = float(row["risk"])
         st.markdown(f"<h1 style='color:{NAVY};margin-bottom:0'>{risk*100:.1f}%</h1>",
                     unsafe_allow_html=True)
-        st.markdown(f"chance of a federal disaster declaration  "
-                    f"&nbsp;{'⚠️' if risk>0.25 else '✅'}", unsafe_allow_html=True)
+        st.markdown("chance of a federal disaster declaration")
         st.caption(f"95% CI: [{row['ci_low']*100:.1f}%, {row['ci_high']*100:.1f}%]")
 
         # plain-language verdict: is this county high or low risk?
         if risk >= 0.40:
-            st.error("🔴 **Very high risk** — strong candidate for relief pre-positioning.")
+            st.error("**Very high risk** — strong candidate for relief pre-positioning.")
         elif risk >= 0.25:
-            st.warning("🟠 **Elevated risk** — monitor and consider pre-positioning.")
+            st.warning("**Elevated risk** — monitor and consider pre-positioning.")
         elif risk >= 0.15:
-            st.info("🟡 **Moderate risk** — keep on watch.")
+            st.info("**Moderate risk** — keep on watch.")
         else:
-            st.success("🟢 **Low risk** — unlikely to need federal relief this month.")
+            st.success("**Low risk** — unlikely to need federal relief this month.")
 
         conf = row["confidence"]
-        cdot = {"High": "🟢", "Medium": "🔵", "Low": "🟠"}.get(conf, "🔵")
-        st.markdown(f"**Model confidence:** {conf} {cdot}  "
+        st.markdown(f"**Model confidence:** {conf}  "
                     f"<span style='color:{GRAY}'>(conformal; ~15.9% of county-months flagged "
                     f"'uncertain' at 95%)</span>", unsafe_allow_html=True)
     with right:
@@ -644,10 +687,8 @@ with tab1:
             st.map(pd.DataFrame({"lat": [row["lat"]], "lon": [row["lon"]]}))
 
     # SHAP: why this prediction? — as a clear horizontal bar chart
-    st.markdown("#### 🔍 Why this prediction? — SHAP feature contributions")
-    icons = {"County disaster history": "🏠", "Property damage": "💰", "Flood events": "🌊",
-             "Storm count": "🌀", "Month (seasonality)": "📅", "Tropical events": "🌀"}
-    sf = [f"{icons.get(row[f'shap{i}'],'•')} {row[f'shap{i}']}" for i in (1, 2, 3)]
+    st.markdown("#### Why this prediction? — SHAP feature contributions")
+    sf = [f"{row[f'shap{i}']}" for i in (1, 2, 3)]
     sv = [float(row[f"shap{i}_val"]) * 100 for i in (1, 2, 3)]
     figs = go.Figure(go.Bar(x=sv[::-1], y=sf[::-1], orientation="h", marker_color=NAVY,
                             text=[f"+{v:.0f}%" for v in sv[::-1]], textposition="outside"))
@@ -659,7 +700,7 @@ with tab1:
 
     exp = row[["county_name", "state", "risk", "ci_low", "ci_high",
                "shap1", "shap2", "shap3"]].to_frame().T
-    st.download_button("⬇️ Export this prediction (CSV)", exp.to_csv(index=False),
+    st.download_button("Export this prediction (CSV)", exp.to_csv(index=False),
                        f"prediction_{row['county_fips']}.csv", "text/csv")
 
 # ============================================================ MAP TAB: Risk spread
@@ -673,52 +714,192 @@ def _county_geojson():
         return json.load(r)
 
 
-with tabmap:
-    st.subheader("🗺️ Where disaster risk concentrates (US counties)")
-    st.markdown("Each county is shaded by its **predicted probability of a federal disaster "
-                "declaration**. Red = higher risk, green = lower. This shows the *spread* of risk "
-                "across the country.")
+# Settings shared with step10_full_system.py
+MAP_SCARCITY = 0.40        # supply = 40% of total need
+MAP_VULN_PCT = 75          # vulnerable = poverty rate in top 25%
+MAP_RISK_PCT = 75          # high risk  = predicted risk in top 25%
+MAP_FLOORS = (0.70, 0.5, 0.4, 0.3, 0.2)
+
+
+def _greedy(need, supply):
+    alloc = np.zeros_like(need)
+    remaining = float(supply)
+    for i in np.argsort(-need):
+        give = min(need[i], remaining)
+        alloc[i] = give
+        remaining -= give
+        if remaining <= 1e-9:
+            break
+    return alloc
+
+
+def _guardian(need, supply, vulnerable):
+    """Same result as the Guardian LP in step10, solved directly: vulnerable counties
+    get at least the floor (stepped down if supply can't cover it), and everyone is
+    then lifted to the highest common coverage level r the supply allows."""
+    fv = np.zeros_like(need)
+    for fl in MAP_FLOORS:
+        cand = np.where(vulnerable, fl, 0.0)
+        if (cand * need).sum() <= supply:
+            fv = cand
+            break
+    lo, hi = 0.0, 1.0
+    for _ in range(60):                       # bisection on r
+        r = (lo + hi) / 2
+        if (np.maximum(fv, r) * need).sum() <= supply:
+            lo = r
+        else:
+            hi = r
+    return np.maximum(fv, lo) * need
+
+
+@st.cache_data
+def _map_table(counties):
     cdf = counties.copy()
-    cdf["fips"] = cdf["county_fips"].str.zfill(5)
+    cdf["fips"] = cdf["county_fips"].astype(str).str.zfill(5)
     cdf["risk_pct"] = (cdf["risk"] * 100).round(1)
+
+    risk_cut = np.nanpercentile(cdf["risk"], MAP_RISK_PCT)
+    pov_cut = np.nanpercentile(cdf["poverty_rate"], MAP_VULN_PCT)
+    hi_risk = cdf["risk"] >= risk_cut
+    vuln = cdf["poverty_rate"] >= pov_cut
+    cdf["category"] = np.select(
+        [hi_risk & vuln, hi_risk & ~vuln, ~hi_risk & vuln],
+        ["High risk + vulnerable", "High risk only", "Vulnerable only"],
+        default="Lower risk")
+    cdf.loc[cdf["poverty_rate"].isna(), "category"] = np.nan
+
+    ok = cdf[["population", "risk", "poverty_rate"]].notna().all(axis=1)
+    sub = cdf[ok].copy()
+    need = (sub["risk"] * sub["population"]).to_numpy(float)
+    keep = need > 0
+    sub, need = sub[keep], need[keep]
+    if len(sub):
+        supply = MAP_SCARCITY * need.sum()
+        vmask = (sub["poverty_rate"] >= pov_cut).to_numpy()
+        sub["greedy_cov"] = (100 * _greedy(need, supply) / need).round(1)
+        sub["guardian_cov"] = (100 * _guardian(need, supply, vmask) / need).round(1)
+        sub["coverage_diff"] = (sub["guardian_cov"] - sub["greedy_cov"]).round(1)
+        cdf = cdf.merge(sub[["fips", "greedy_cov", "guardian_cov", "coverage_diff"]],
+                        on="fips", how="left")
+    else:
+        cdf["greedy_cov"] = cdf["guardian_cov"] = cdf["coverage_diff"] = np.nan
+    return cdf
+
+
+MAP_VIEWS = {
+    "Predicted declaration risk": (
+        "Each county is shaded by its **predicted probability of a federal disaster "
+        "declaration**. Red = higher risk, green = lower."),
+    "Risk × social vulnerability": (
+        "Counties in the top 25% of predicted risk and/or the top 25% of poverty rate. "
+        "**Dark red** counties are both high-risk and vulnerable: the places a purely "
+        "damage-based allocation is most likely to underserve."),
+    "Guardian vs greedy coverage": (
+        "Difference in coverage (percentage points) between Guardian and greedy "
+        "(damage-based) allocation at 40% supply. **Green** = Guardian gives this county "
+        "more of its need; **red** = less. Greedy fully covers the largest-need counties "
+        "and gives nothing to the rest; Guardian spreads supply and protects vulnerable counties."),
+    "Prediction confidence": (
+        "How certain the model is for each county, based on the width of the ensemble "
+        "confidence interval (High = narrow interval)."),
+}
+CAT_COLORS = {"High risk + vulnerable": "#b2182b", "High risk only": "#ef8a62",
+              "Vulnerable only": "#67a9cf", "Lower risk": "#d1e5f0"}
+CONF_COLORS = {"High": "#2b7bba", "Medium": "#89bedc", "Low": "#dbe9f6"}
+
+
+def _map_figure(cdf, view, gj):
+    hover = {"state": True, "fips": False, "risk_pct": True}
+    if gj is not None:
+        common = dict(geojson=gj, locations="fips", scope="usa", hover_name="county_name")
+        make = px.choropleth
+    else:  # offline fallback: county centroids as points
+        common = dict(lat="lat", lon="lon", scope="usa", hover_name="county_name")
+        make = px.scatter_geo
+
+    if view == "Predicted declaration risk":
+        fig = make(cdf, color="risk_pct", color_continuous_scale="RdYlGn_r",
+                   hover_data=hover, labels={"risk_pct": "risk %"}, **common)
+    elif view == "Risk × social vulnerability":
+        d = cdf.dropna(subset=["category"])
+        fig = make(d, color="category", color_discrete_map=CAT_COLORS,
+                   category_orders={"category": list(CAT_COLORS)},
+                   hover_data={**hover, "poverty_rate": ":.1%"},
+                   labels={"risk_pct": "risk %", "category": "County category",
+                           "poverty_rate": "poverty rate"}, **common)
+    elif view == "Guardian vs greedy coverage":
+        d = cdf.dropna(subset=["coverage_diff"])
+        lim = float(np.nanmax(np.abs(d["coverage_diff"]))) if len(d) else 1.0
+        fig = make(d, color="coverage_diff", color_continuous_scale="RdYlGn",
+                   range_color=(-lim, lim),
+                   hover_data={**hover, "greedy_cov": True, "guardian_cov": True},
+                   labels={"coverage_diff": "Guardian − greedy (pp)",
+                           "greedy_cov": "greedy coverage %",
+                           "guardian_cov": "Guardian coverage %",
+                           "risk_pct": "risk %"}, **common)
+    else:
+        d = cdf.dropna(subset=["confidence"])
+        fig = make(d, color="confidence", color_discrete_map=CONF_COLORS,
+                   category_orders={"confidence": list(CONF_COLORS)},
+                   hover_data={**hover, "ci_low": ":.3f", "ci_high": ":.3f"},
+                   labels={"risk_pct": "risk %", "confidence": "Prediction confidence"},
+                   **common)
+
+    if gj is None:
+        fig.update_traces(marker=dict(size=7, line=dict(width=0)))
+    else:
+        fig.update_traces(marker_line_width=0)
+    fig.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=540,
+                      legend=dict(yanchor="bottom", y=0.02, xanchor="left", x=0.01))
+    return fig
+
+
+with tabmap:
+    st.subheader("County-level views")
+    view = st.radio("Map view", list(MAP_VIEWS), horizontal=True)
+    st.markdown(MAP_VIEWS[view])
+
+    cdf = _map_table(counties)
     if len(cdf) < 200:
         st.info("Showing only the bundled sample counties. Run `make_dashboard_data.py` and copy "
-                "`county_predictions.csv` into `data/` to map all ~3,200 counties.", icon="ℹ️")
+                "`county_predictions.csv` into `data/` to map all ~3,200 counties. (With the "
+                "sample, the top-25% cutoffs and the allocation are computed on those few "
+                "counties only.)")
 
-    rendered = False
     try:
         gj = _county_geojson()
-        fig = px.choropleth(cdf, geojson=gj, locations="fips", color="risk_pct",
-                            color_continuous_scale="RdYlGn_r", scope="usa",
-                            hover_name="county_name",
-                            hover_data={"state": True, "risk_pct": True, "fips": False},
-                            labels={"risk_pct": "risk %"})
-        fig.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=540,
-                          coloraxis_colorbar_title="risk %")
-        st.plotly_chart(fig, width='stretch')
-        rendered = True
     except Exception:
-        pass
-
-    if not rendered:  # offline fallback: dot map using county centroids (no boundaries needed)
-        fig = px.scatter_geo(cdf, lat="lat", lon="lon", color="risk_pct", scope="usa",
-                             color_continuous_scale="RdYlGn_r", hover_name="county_name",
-                             hover_data={"state": True, "risk_pct": True},
-                             labels={"risk_pct": "risk %"})
-        fig.update_traces(marker=dict(size=7, line=dict(width=0)))
-        fig.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=540,
-                          coloraxis_colorbar_title="risk %")
+        gj = None
         st.caption("County-boundary file unavailable offline — showing counties as points instead.")
-        st.plotly_chart(fig, width='stretch')
+    st.plotly_chart(_map_figure(cdf, view, gj), width='stretch')
 
-    hi = cdf.nlargest(10, "risk")[["county_name", "state", "risk_pct"]]
-    st.markdown("**Highest-risk counties shown:**")
-    st.dataframe(hi.rename(columns={"county_name": "County", "state": "State",
-                                    "risk_pct": "Risk %"}), hide_index=True, width='stretch')
+    if view == "Predicted declaration risk":
+        hi = cdf.nlargest(10, "risk")[["county_name", "state", "risk_pct"]]
+        st.markdown("**Highest-risk counties shown:**")
+        st.dataframe(hi.rename(columns={"county_name": "County", "state": "State",
+                                        "risk_pct": "Risk %"}),
+                     hide_index=True, width='stretch')
+    elif view == "Risk × social vulnerability":
+        counts = cdf["category"].value_counts().reindex(list(CAT_COLORS)).fillna(0).astype(int)
+        cols = st.columns(4)
+        for c, (k, v) in zip(cols, counts.items()):
+            c.metric(k, f"{v:,}")
+    elif view == "Guardian vs greedy coverage":
+        d = cdf.dropna(subset=["coverage_diff"])
+        cols = st.columns(3)
+        cols[0].metric("Counties gaining under Guardian", f"{int((d['coverage_diff'] > 0.5).sum()):,}")
+        cols[1].metric("Counties losing under Guardian", f"{int((d['coverage_diff'] < -0.5).sum()):,}")
+        cols[2].metric("Counties greedy gives nothing", f"{int((d['greedy_cov'] <= 0).sum()):,}")
+    else:
+        counts = cdf["confidence"].value_counts().reindex(list(CONF_COLORS)).fillna(0).astype(int)
+        cols = st.columns(3)
+        for c, (k, v) in zip(cols, counts.items()):
+            c.metric(f"{k} confidence", f"{v:,}")
 
 # ============================================================ TAB 2: Fair allocation
 with tab2:
-    st.subheader("🎯 Fair Resource Allocation")
+    st.subheader("Fair Resource Allocation")
     supply = st.slider("Relief supply (% of total predicted need)", 20, 60, 40, step=20)
     sub = alloc[alloc["supply"] == supply].copy()
 
@@ -766,12 +947,12 @@ with tab2:
     ff.update_layout(xaxis_title="Equity floor", yaxis_title="Score (%)",
                      height=360, margin=dict(t=20))
     st.plotly_chart(ff, width='stretch')
-    st.download_button("⬇️ Export allocation comparison (CSV)", sub.to_csv(index=False),
+    st.download_button("Export allocation comparison (CSV)", sub.to_csv(index=False),
                        f"allocation_supply{supply}.csv", "text/csv")
 
 # ============================================================ TAB 3: Climate stress
 with tab3:
-    st.subheader("🌡️ Climate Stress Testing")
+    st.subheader("Climate Stress Testing")
     c1, c2 = st.columns(2)
     scenario = c1.radio("Emissions scenario",
                         ["Current", "SSP2-4.5", "SSP5-8.5"], horizontal=True)
@@ -785,7 +966,7 @@ with tab3:
     a, b = st.columns(2)
     a.metric("Total coverage", f"{rec['total']:.1f}%",
              delta=f"{rec['total']-40:.1f} vs current", delta_color="inverse")
-    b.metric("Vulnerable coverage", f"{rec['vulnerable']:.1f}%", delta="held ✅",
+    b.metric("Vulnerable coverage", f"{rec['vulnerable']:.1f}%", delta="held",
              delta_color="off")
 
     fig = go.Figure()
@@ -801,15 +982,15 @@ with tab3:
     if rec["greedy_vulnerable"] < 30:
         st.warning(f"Under {scenario}{' + budget cut' if cut else ''}, the greedy baseline leaves "
                    f"vulnerable coverage at ~{rec['greedy_vulnerable']:.0f}% and abandons ~1,121+ "
-                   f"counties/month, while Guardian holds {rec['vulnerable']:.0f}%.", icon="⚠️")
+                   f"counties/month, while Guardian holds {rec['vulnerable']:.0f}%.")
     st.caption("Hazard factors derived from IPCC AR6 warming × ~7%/°C precipitation scaling "
                "(SSP2-4.5: +19%; SSP5-8.5: +31%).")
-    st.download_button("⬇️ Export climate results (CSV)", climate.to_csv(index=False),
+    st.download_button("Export climate results (CSV)", climate.to_csv(index=False),
                        "climate_stress.csv", "text/csv")
 
 # ============================================================ TAB 4: Results summary
 with tab4:
-    st.subheader("📈 Results Summary (paper metrics)")
+    st.subheader("Results Summary (paper metrics)")
     p, s, e = M["prediction"], M["spatial"], M["extreme"]
     r1 = st.columns(4)
     r1[0].metric("ROC-AUC", f"{p['auc']:.3f}", f"CI [{p['auc_ci'][0]}, {p['auc_ci'][1]}]",
@@ -849,12 +1030,12 @@ with tab4:
         st.dataframe(md.style.format({"AUC": "{:.3f}", "PR-AUC": "{:.3f}"})
                      .highlight_max(subset=["AUC"], color="#e6f4ea"),
                      hide_index=True, width='stretch')
-    st.download_button("⬇️ Export all metrics (JSON)", json.dumps(M, indent=2),
+    st.download_button("Export all metrics (JSON)", json.dumps(M, indent=2),
                        "metrics_summary.json", "application/json")
 
 # ============================================================ TAB 5: Export & share
 with tab5:
-    st.subheader("📥 Export & Share")
+    st.subheader("Export & Share")
     st.markdown("**Download results**")
     d = st.columns(4)
     d[0].download_button("County predictions (CSV)", counties.to_csv(index=False),
@@ -867,12 +1048,3 @@ with tab5:
                          "metrics_summary.json", "application/json")
     st.caption("For 300-DPI figures, use each Plotly chart's camera icon (top-right on hover) "
                "to export a publication-quality PNG.")
-
-    st.divider()
-    st.markdown("**Citation**")
-    st.code("Author(s). \"ML-Based Prediction and Fairness-Aware Allocation of US Federal "
-            "Disaster Resources.\" International Journal of Disaster Risk Reduction (under review). "
-            "DOI: 10.xxxx/xxxxx", language="text")
-    st.markdown("- 📄 Full paper: *IJDRR submission (link TBD)*\n"
-                "- 💻 Code: *github.com/your-repo/disaster-prediction*")
-    st.caption("Open-access supplement · static pre-computed results · no login required.")
